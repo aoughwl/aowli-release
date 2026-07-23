@@ -7,7 +7,13 @@ typed, semantically-analysed NIF (`.s.nif`) — the form emitted after `nimsem`.
 This repo is **public**: anyone may download and use these binaries.
 **Issues welcome** → <https://github.com/aoughwl/aowli-release/issues>
 
-## v0.2.0 — runtime-complete
+## v0.2.1 — stdin-hang fix + faster interpreter
+
+**v0.2.1 fixes a startup hang:** aowli-interp and aowli-dbg no longer block
+when launched with an open stdin pipe (e.g. under the aowlcode MCP debug/trace
+tools or an editor/CI harness) — stdin is now read lazily, only when the program
+actually reads it. Also lands interpreter performance work (~2x on loop-heavy
+code; the tree-walker that backs `aowli-dbg`).
 
 This release ships the **runtime-complete** aowli. All six runtime layers are now
 implemented, so programs that exercise real memory, the OS, finalization, dynamic
