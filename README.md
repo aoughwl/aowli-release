@@ -7,6 +7,25 @@ typed, semantically-analysed NIF (`.s.nif`) — the form emitted after `nimsem`.
 This repo is **public**: anyone may download and use these binaries.
 **Issues welcome** → <https://github.com/aoughwl/aowli-release/issues>
 
+## v0.2.0 — runtime-complete
+
+This release ships the **runtime-complete** aowli. All six runtime layers are now
+implemented, so programs that exercise real memory, the OS, finalization, dynamic
+dispatch, concurrency, and parallelism run — no longer just the pure-value subset:
+
+| layer | what landed |
+|-------|-------------|
+| **flat memory** | a real flat byte heap under the value model — `cast`, `ptr`/`UncheckedArray`, `copyMem`/`equalMem`, pointer arithmetic write through actual bytes |
+| **OS / fd** | genuine file descriptors and syscalls — `readFile`/`writeFile` are byte-exact, argv/env, stdio on real fds |
+| **finalization + refcount** | ARC-style reference counting with destructors/finalizers firing at scope exit; custom `=destroy` hooks run |
+| **loud dispatch** | method/dispatch on nil or an unimplemented shape is a **hard error**, never a silent no-op — the old silent-nil-dispatch class is gone |
+| **async** | the cooperative Future/await dispatcher runs; combinators and `{.async.}` sugar execute |
+| **threads** | a cooperative thread pool with `parfor` (`||` fork-join) |
+
+Corpus parity (differential vs the nimony compiler as reference):
+**tree-walker 432/469 = 92%**, **358 programs PASS-BOTH** engines, **zero
+in-scope silent failures**.
+
 ## Binaries
 
 | binary | what it does |
@@ -27,8 +46,7 @@ chmod +x bin/aowli-interp bin/aowli-dbg
 
 Built from the private source via the `aowl-release` pipeline:
 
-- **IR control-flow obfuscation** (`obfnif`, typed-NIF layer — opaque predicates, dead guards, junk) — behaviour-preserving, applied before codegen so it reaches the machine code
-- **licence gate** — fail-closed module-init check
+- **licence gate** — fail-closed module-init check (build refuses to run past its validity window)
 - **`strip --strip-all`** — symbol table removed (no proc/type names)
 
 Verified before publishing: identical program output vs the source build, and the
@@ -38,13 +56,13 @@ stripped binaries expose **no aowli source paths and no internal proc/type names
 
 | binary | size (bytes) | sha256 |
 |--------|-------------|--------|
-| `bin/aowli-interp` | 728,992 | `5ed7c80eade6800826caece1552fccfef6e69b9aa262d3ba744699613a46568f` |
-| `bin/aowli-dbg`    | 692,128 | `3a65ee45251fc9ca0ebb55973352be1244892aabaf0ca9d4beb5c8831291034b` |
+| `bin/aowli-interp` | 1,949,600 | `50992612b9010dc9a7b09c957e6911c2cf4c96d0a633e5d5a188c084fa8890d7` |
+| `bin/aowli-dbg`    | 794,528 | `e7053047f628f1341d5018899aed84b4f631fcdba58c0fffb7904cd0a9ff2c9d` |
 
 ```sh
 sha256sum -c <<'EOF'
-5ed7c80eade6800826caece1552fccfef6e69b9aa262d3ba744699613a46568f  bin/aowli-interp
-3a65ee45251fc9ca0ebb55973352be1244892aabaf0ca9d4beb5c8831291034b  bin/aowli-dbg
+50992612b9010dc9a7b09c957e6911c2cf4c96d0a633e5d5a188c084fa8890d7  bin/aowli-interp
+e7053047f628f1341d5018899aed84b4f631fcdba58c0fffb7904cd0a9ff2c9d  bin/aowli-dbg
 EOF
 ```
 
@@ -52,7 +70,7 @@ EOF
 
 Look up each build by hash:
 
-- aowli-interp — <https://www.virustotal.com/gui/file/5ed7c80eade6800826caece1552fccfef6e69b9aa262d3ba744699613a46568f>
-- aowli-dbg — <https://www.virustotal.com/gui/file/3a65ee45251fc9ca0ebb55973352be1244892aabaf0ca9d4beb5c8831291034b>
+- aowli-interp — <https://www.virustotal.com/gui/file/50992612b9010dc9a7b09c957e6911c2cf4c96d0a633e5d5a188c084fa8890d7>
+- aowli-dbg — <https://www.virustotal.com/gui/file/e7053047f628f1341d5018899aed84b4f631fcdba58c0fffb7904cd0a9ff2c9d>
 
 (Scan results populate once a binary is submitted to VirusTotal.)
