@@ -47,6 +47,7 @@ chmod +x bin/aowli-interp bin/aowli-dbg
 Built from the private source via the `aowl-release` pipeline:
 
 - **licence gate** — fail-closed module-init check (build refuses to run past its validity window)
+- **IR control-flow obfuscation (obfnif)** — behaviour-preserving dead-guards, junk discards, and opaque predicates woven into the typed NIF before the backend runs, so the shipped machine code carries un-elided decoy control flow (symbol rename left off; program output is unchanged)
 - **`strip --strip-all`** — symbol table removed (no proc/type names)
 
 Verified before publishing: identical program output vs the source build, and the
@@ -56,13 +57,13 @@ stripped binaries expose **no aowli source paths and no internal proc/type names
 
 | binary | size (bytes) | sha256 |
 |--------|-------------|--------|
-| `bin/aowli-interp` | 1,949,600 | `50992612b9010dc9a7b09c957e6911c2cf4c96d0a633e5d5a188c084fa8890d7` |
-| `bin/aowli-dbg`    | 794,528 | `e7053047f628f1341d5018899aed84b4f631fcdba58c0fffb7904cd0a9ff2c9d` |
+| `bin/aowli-interp` | 1,949,600 | `72bb65fd0d3f61166d2623a3a6384dc0c75eb4bfe6b4de017d722f6d38491380` |
+| `bin/aowli-dbg`    | 794,528 | `567fe7f32d8be4ee5ff40283bfad4ff794acec2bd081cc9de9c88ec52baaa123` |
 
 ```sh
 sha256sum -c <<'EOF'
-50992612b9010dc9a7b09c957e6911c2cf4c96d0a633e5d5a188c084fa8890d7  bin/aowli-interp
-e7053047f628f1341d5018899aed84b4f631fcdba58c0fffb7904cd0a9ff2c9d  bin/aowli-dbg
+72bb65fd0d3f61166d2623a3a6384dc0c75eb4bfe6b4de017d722f6d38491380  bin/aowli-interp
+567fe7f32d8be4ee5ff40283bfad4ff794acec2bd081cc9de9c88ec52baaa123  bin/aowli-dbg
 EOF
 ```
 
@@ -70,7 +71,7 @@ EOF
 
 Look up each build by hash:
 
-- aowli-interp — <https://www.virustotal.com/gui/file/50992612b9010dc9a7b09c957e6911c2cf4c96d0a633e5d5a188c084fa8890d7>
-- aowli-dbg — <https://www.virustotal.com/gui/file/e7053047f628f1341d5018899aed84b4f631fcdba58c0fffb7904cd0a9ff2c9d>
+- aowli-interp — <https://www.virustotal.com/gui/file/72bb65fd0d3f61166d2623a3a6384dc0c75eb4bfe6b4de017d722f6d38491380>
+- aowli-dbg — <https://www.virustotal.com/gui/file/567fe7f32d8be4ee5ff40283bfad4ff794acec2bd081cc9de9c88ec52baaa123>
 
 (Scan results populate once a binary is submitted to VirusTotal.)
