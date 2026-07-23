@@ -46,24 +46,26 @@ chmod +x bin/aowli-interp bin/aowli-dbg
 
 Built from the private source via the `aowl-release` pipeline:
 
-- **licence gate** — fail-closed module-init check (build refuses to run past its validity window)
 - **IR control-flow obfuscation (obfnif)** — behaviour-preserving dead-guards, junk discards, and opaque predicates woven into the typed NIF before the backend runs, so the shipped machine code carries un-elided decoy control flow (symbol rename left off; program output is unchanged)
-- **`strip --strip-all`** — symbol table removed (no proc/type names)
+- **string-encrypted 7-day expiry gate** — a fail-closed licence check runs at module-init and again at exit; the refusal message is stored XOR-obfuscated and decrypted into a stack buffer only when it fires, so it never appears in `strings`. The check is dispersed across three sites and output-coupled (an accumulator the exit path verifies), so patching one branch corrupts behaviour rather than cleanly bypassing.
+- **anti-debug** — non-invasive `/proc/self/status` TracerPid check; a traced process refuses. Undebugged runs are unaffected.
+- **hardened strip** — `strip --strip-all` (symbol table) plus `objcopy` removal of `.comment`, `.note.*`, and `.gnu_debuglink` (compiler/build-id provenance).
 
-Verified before publishing: identical program output vs the source build, and the
-stripped binaries expose **no aowli source paths and no internal proc/type names**.
+Verified before publishing: byte-identical program output vs the source build
+across the corpus, and the stripped binaries expose **no aowli source paths, no
+internal proc/type names, and no gate strings**.
 
 ## Integrity
 
 | binary | size (bytes) | sha256 |
 |--------|-------------|--------|
-| `bin/aowli-interp` | 1,949,600 | `72bb65fd0d3f61166d2623a3a6384dc0c75eb4bfe6b4de017d722f6d38491380` |
-| `bin/aowli-dbg`    | 794,528 | `567fe7f32d8be4ee5ff40283bfad4ff794acec2bd081cc9de9c88ec52baaa123` |
+| `bin/aowli-interp` | 1,949,240 | `e1f46255092952fcd7f0caaad565907331c243510cad757af6fe4670aca8d9ee` |
+| `bin/aowli-dbg`    | 802,360 | `7e4f137b7cedc55863c2026cc31a9445ebe8139a5ce7bcab6b4b914bff5179af` |
 
 ```sh
 sha256sum -c <<'EOF'
-72bb65fd0d3f61166d2623a3a6384dc0c75eb4bfe6b4de017d722f6d38491380  bin/aowli-interp
-567fe7f32d8be4ee5ff40283bfad4ff794acec2bd081cc9de9c88ec52baaa123  bin/aowli-dbg
+e1f46255092952fcd7f0caaad565907331c243510cad757af6fe4670aca8d9ee  bin/aowli-interp
+7e4f137b7cedc55863c2026cc31a9445ebe8139a5ce7bcab6b4b914bff5179af  bin/aowli-dbg
 EOF
 ```
 
@@ -71,7 +73,7 @@ EOF
 
 Look up each build by hash:
 
-- aowli-interp — <https://www.virustotal.com/gui/file/72bb65fd0d3f61166d2623a3a6384dc0c75eb4bfe6b4de017d722f6d38491380>
-- aowli-dbg — <https://www.virustotal.com/gui/file/567fe7f32d8be4ee5ff40283bfad4ff794acec2bd081cc9de9c88ec52baaa123>
+- aowli-interp — <https://www.virustotal.com/gui/file/e1f46255092952fcd7f0caaad565907331c243510cad757af6fe4670aca8d9ee>
+- aowli-dbg — <https://www.virustotal.com/gui/file/7e4f137b7cedc55863c2026cc31a9445ebe8139a5ce7bcab6b4b914bff5179af>
 
 (Scan results populate once a binary is submitted to VirusTotal.)
